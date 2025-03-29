@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Todo List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin: 5px 0;
+            background: #f9f9f9;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Todo List</h2>
+
+    <input type="text" id="taskInput" placeholder="Enter a task">
+    <button onclick="addTask()">Add Task</button>
+
+    <input type="text" id="searchInput" placeholder="Search tasks" onkeyup="searchTasks()">
+
+    <ul id="taskList"></ul>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+        function renderTasks() {
+            const taskList = document.getElementById("taskList");
+            taskList.innerHTML = "";
+
+            tasks.forEach(task => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <span class="${task.completed ? 'completed' : ''}" onclick="toggleTask(${task.id})">${task.text}</span>
+                    <button onclick="removeTask(${task.id})">❌</button>
+                `;
+                li.setAttribute("data-id", task.id);
+                taskList.appendChild(li);
+            });
+
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById("taskInput");
+            const text = taskInput.value.trim();
+            if (!text) return;
+
+            const newTask = { id: Date.now(), text, completed: false };
+            tasks.push(newTask);
+            taskInput.value = "";
+            renderTasks();
+        }
+
+        function toggleTask(id) {
+            tasks = tasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task);
+            renderTasks();
+        }
+
+        function removeTask(id) {
+            tasks = tasks.filter(task => task.id !== id);
+            renderTasks();
+        }
+
+        function searchTasks() {
+            const query = document.getElementById("searchInput").value.toLowerCase();
+            document.querySelectorAll("li").forEach(li => {
+                const text = li.querySelector("span").innerText.toLowerCase();
+                li.classList.toggle("hidden", !text.includes(query));
+            });
+        }
+
+        renderTasks();
+    </script>
+
+</body>
+</html>
